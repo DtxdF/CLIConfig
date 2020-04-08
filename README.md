@@ -12,7 +12,7 @@ CLIConfig -h
 
 ## Ejemplos de CLIConfig
 
-CLIConfig ayudara a la persona que esté haciendo scripting y necesite interactuar con los archivos de configuración del sistema. Por lo que siguiendo las pautas que se mostrarán a continuación quedará más que claro:
+CLIConfig ayudará a la persona que esté haciendo scripting y necesite interactuar con los archivos de configuración del sistema. Por lo que siguiendo las pautas que se mostrarán a continuación quedará más que claro:
 
 ### Leer la configuración
 
