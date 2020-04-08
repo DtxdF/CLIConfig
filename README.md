@@ -201,7 +201,40 @@ CLIConfig -h
 
 ## Funcionamiento de cada parámetro
 
+| Parámetro       | Descripción                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
+| -h/--help       | Muestra la ayuda                                                            |
+| -s/--show       | Muestra el archivo de configuración parseado                                |
+| -k/--key        | Coincidir con la clave                                                      |
+| -w/--write      | Agregar una clave y un valor a la configuración                             |
+| -v/--value      | El valor de la clave                                                        |
+| -n/--no-banner  | No mostrar el procesamiento de los que se está haciendo                     |
+| -o/--overwrite  | Sobre-escribe el valor de una(s) clave(s)                                   |
+| -E/--expression | Usar un valor como coincidencia en vez de la clave                          |
+| -O/--only       | Sólo actuar con N filas                                                     |
+| -i/--id         | Actuar solamente cuando la llamada del callback número X sea igual a Y      |
+| -p/--pattern    | Cuándo haya N coincidencias encontradas actuar con la que ajustó el usuario |
+| -d/--delete     | Borrar una clave                                                            |
 
+**NOTA:** Es necesario comprender el funcionamiento de cada parámetro que usa, ya que no todos funcionan de la misma manera y no todos se pueden combinar, además de los valores por defecto que fueron otorgados a éstos por el diseño del mismo programa.
+
+| Parámetro       | Combinaciones                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| -s/--show       | -k/--key, -E/--expression, -O/--only, -i/--id, -p/--pattern                                          |
+| -k/--key        | -v/--value, -w/--write, -s/--show, -o/--overwrite, -O/--only, -i/--id, -p/--pattern, -d/--delete     |
+| -w/--write      | -k/--key, -v/--value                                                                                 |
+| -v/--value      | -k/--key, -w/--write, -o/--overwrite, -O/--only, -p/--pattern                                        |
+| -o/--overwrite  | -k/--key, -v/--value, -E/--expression, -O/--only, -p/--pattern                                       |
+| -E/--expression | -s/--show, -v/--value, -o/--overwrite, -O/--only, -p/--pattern                                       |
+| -O/--only       | -s/--show, -k/--key, -v/--value, -o/--overwrite, -E/--expression, -i/--id, -p/--pattern, -d/--delete |
+| -i/--id         | -s/--show, -O/--only                                                                                 |
+| -p/--pattern    | -s/--show, -k/--key, -v/--value, -o/--overwrite, -E/--expression, -O/--only, -d/--delete             |
+
+**NOTA-#1:** El parámetro **-n**/**--no-banner** no fue colocado en la tabla porque se puede combinar con todos
+
+**NOTA-#2:** Sí se define el parámetro **-k/--key** al mismo tiempo que **-E/--expression**, el segundo no se tomara en cuenta, pero si el primero.
+
+**NOTA-#3:** El valor por defecto de los siguientes parámetros es "**0**", lo que quiere decir que no se hará nada al menos que se le coloque un número mayor: **-O/--only**, **-i/--id**, **-p/--pattern**.
 
 ## Sintaxis de los archivos de configuración
 
