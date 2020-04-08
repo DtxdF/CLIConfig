@@ -362,6 +362,8 @@ int main(void) {
 	free(config.lastname);
 	free(config.alias);
 
+	fclose(file);
+
 	return EXIT_SUCCESS;
 
 }
