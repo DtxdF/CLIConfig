@@ -11,11 +11,15 @@
 
 // CALLBACKS
 int show_config(void * config, char * key, char * value); // Mostramos la configuración
-int write_config(FILE * file, char * key, char * value); // Escribimos en la configuración
 int overwrite_config(void * config, char * name, char * val); // Sobre-escribimos la configuración
+
+// Excepto la siguiente:
+int write_config(FILE * file, char * key, char * value); // Escribimos en la configuración
+
 /* Detectamos si nuestro amigo "strtol" devuelve un error, sí es así
    muestra un mensaje */
 int invalid_number(char * strton, const char * message);
+
 /* Reiniciamos valores auxiliares. Útil para cuando hay muchos
    archivos */
 inline void reset_values();
@@ -26,6 +30,8 @@ extern char * value;
 extern char * expression;
 extern int do_delete;
 extern int execute_exit;
+extern long init;
+extern long init_aux;
 extern long only;
 extern long only_aux;
 extern long identifier;
@@ -51,7 +57,7 @@ int main(int argc, char *argv[]) {
 	int opt;
 	int index = 0;
 	int errcod;
-	char * shortopts = ":hsk:wv:noE:O:i:p:d";
+	char * shortopts = ":hsk:wv:noE:O:i:p:dI:";
 
 	char * filename;
 
@@ -64,7 +70,9 @@ int main(int argc, char *argv[]) {
 		{"overwrite",  no_argument,       &do_overwrite, 1 },
 		{"no-banner",  no_argument,       &do_no_banner, 0 },
 		{"expression", required_argument, NULL,         'E'},
+		{"init",       required_argument, NULL,         'I'},
 		{"only",       required_argument, NULL,         'O'},
+		{"offset",     required_argument, NULL,         'O'},
 		{"id",         required_argument, NULL,         'i'},
 		{"pattern",    required_argument, NULL,         'p'},
 		{"delete",     required_argument, NULL,         'd'},
@@ -115,6 +123,10 @@ int main(int argc, char *argv[]) {
 
 			case 'O':
 				only = invalid_number(optarg, "Número de coincidencias incorrecto");
+				break;
+
+			case 'I':
+				init = invalid_number(optarg, "El número de iniciación es incorrecto");
 				break;
 
 			case 'i':
@@ -335,6 +347,7 @@ inline void reset_values() {
 	only_aux = 0;
 	id_aux = 0;
 	pattern_aux = 0;
+	init_aux = 0;
 
 }
 
@@ -415,10 +428,27 @@ inline unsigned int isdeleted(char * name) {
 
 }
 
+inline unsigned int init_count() {
+	if (init == 0) {
+		return 0;
+
+	}
+
+	init_aux++;
+
+	if (init_aux < init) {
+		return 1;
+	
+	}
+
+	return 0;
+
+}
+
 int show_config(void * config, char * name, char * value) {
 	int found = 0;
 
-	if ((only_count()) || identified()) {
+	if ((only_count()) || identified() || init_count()) {
 		return 0;
 	}
 
@@ -478,7 +508,7 @@ int overwrite_config(void * config, char * name, char * val) {
 	int found = 0;
 	int overwrite_normal = 0;
 
-	if (only_count() || isdeleted(name)) {
+	if (only_count() || isdeleted(name) || init_count()) {
 		return 0;
 	}
 
@@ -547,7 +577,9 @@ void usage() {
 	fprintf(stderr, "    -n, --no-banner   No mostrar el procesamiento de lo que se está haciendo (útil cuando se lee)\n");
 	fprintf(stderr, "    -o, --overwrite   Sobre-escribe el valor de una clave. ADVERTENCIA: ¡También sobre-escribe el archivo!\n");
 	fprintf(stderr, "    -E, --expression  Sólo actuar cuando haya una coincidencia con el valor\n");
+	fprintf(stderr, "    -I, --init        Iniciar con la interacción a partir de N (-O pone el limite).\n");
 	fprintf(stderr, "    -O, --only        Sólo actuar N veces\n");
+	fprintf(stderr, "        --offset      Igual que \"-O/--only\"\n");
 	fprintf(stderr, "    -i, --id          Actuar sólo cuando la N vez sea igual al identificador\n");
 	fprintf(stderr, "    -p, --pattern     Similar a \"--id\", pero actúa sólo con la N coincidencia\n");
 	fprintf(stderr, "    -d, --delete      Borrar una coincidencia. Al igual que \"-o\" ¡TAMBIÉN SOBRE-ESCRIBE EL ARCHIVO!\n");

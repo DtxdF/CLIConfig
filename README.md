@@ -227,24 +227,27 @@ CLIConfig -h
 | -n/--no-banner  | No mostrar el procesamiento de los que se está haciendo                     |
 | -o/--overwrite  | Sobre-escribe el valor de una(s) clave(s)                                   |
 | -E/--expression | Usar un valor como coincidencia en vez de la clave                          |
+| -I/--init       | Iniciar la interacción después de un número N                               |
 | -O/--only       | Sólo actuar con N filas                                                     |
+|    --offset     | Lo mismo que -O/--only                                                      |
 | -i/--id         | Actuar solamente cuando la llamada del callback número X sea igual a Y      |
 | -p/--pattern    | Cuándo haya N coincidencias encontradas actuar con la que ajustó el usuario |
 | -d/--delete     | Borrar una clave                                                            |
 
 **NOTA:** Es necesario comprender el funcionamiento de cada parámetro que usa, ya que no todos funcionan de la misma manera y no todos se pueden combinar, además de los valores por defecto que fueron otorgados a éstos por el diseño del mismo programa.
 
-| Parámetro       | Combinaciones                                                                                        |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| -s/--show       | -k/--key, -E/--expression, -O/--only, -i/--id, -p/--pattern                                          |
-| -k/--key        | -v/--value, -w/--write, -s/--show, -o/--overwrite, -O/--only, -i/--id, -p/--pattern, -d/--delete     |
-| -w/--write      | -k/--key, -v/--value                                                                                 |
-| -v/--value      | -k/--key, -w/--write, -o/--overwrite, -O/--only, -p/--pattern                                        |
-| -o/--overwrite  | -k/--key, -v/--value, -E/--expression, -O/--only, -p/--pattern                                       |
-| -E/--expression | -s/--show, -v/--value, -o/--overwrite, -O/--only, -p/--pattern                                       |
-| -O/--only       | -s/--show, -k/--key, -v/--value, -o/--overwrite, -E/--expression, -i/--id, -p/--pattern, -d/--delete |
-| -i/--id         | -s/--show, -O/--only                                                                                 |
-| -p/--pattern    | -s/--show, -k/--key, -v/--value, -o/--overwrite, -E/--expression, -O/--only, -d/--delete             |
+| Parámetro          | Combinaciones                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------- |
+| -s/--show          | -k/--key, -E/--expression, -O/--only, -i/--id, -p/--pattern                                          |
+| -k/--key           | -v/--value, -w/--write, -s/--show, -o/--overwrite, -O/--only, -i/--id, -p/--pattern, -d/--delete     |
+| -w/--write         | -k/--key, -v/--value                                                                                 |
+| -v/--value         | -k/--key, -w/--write, -o/--overwrite, -O/--only, -p/--pattern                                        |
+| -o/--overwrite     | -k/--key, -v/--value, -E/--expression, -O/--only, -p/--pattern                                       |
+| -E/--expression    | -s/--show, -v/--value, -o/--overwrite, -O/--only, -p/--pattern                                       |
+| -I/--init          | -s/--show, -k/--key, -v/--value, -o/--overwrite, -E/--expression, -p/--pattern, -d/--delete          |
+| -O/--only/--offset | -s/--show, -k/--key, -v/--value, -o/--overwrite, -E/--expression, -i/--id, -p/--pattern, -d/--delete |
+| -i/--id            | -s/--show, -O/--only                                                                                 |
+| -p/--pattern       | -s/--show, -k/--key, -v/--value, -o/--overwrite, -E/--expression, -O/--only, -d/--delete             |
 
 **NOTA-#1:** El parámetro **-n**/**--no-banner** no fue colocado en la tabla porque se puede combinar con todos
 

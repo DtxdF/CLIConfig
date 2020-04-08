@@ -51,12 +51,14 @@ int execute_exit = 0; // Para informar cuando haya o no haya una coincidencia
 long identifier = 0; 
 long only = 0;
 long patterns = 0;
+long init = 0;
 
 // Auxiliares
 
 long id_aux = 0;
 long only_aux = 0;
 long pattern_aux = 0;
+long init_aux = 0;
 
 struct tmp_config {
 	int fd;
