@@ -213,7 +213,126 @@ clave=valor
 
 ## Ejemplo de la librería
 
+Primero compilamos la librería:
 
+```bash
+make conf_parser.o
+```
+
+Teniendo el siguiente archivo de configuración:
+
+```bash
+cat test.conf
+```
+
+```
+name=Josef
+lastname=Naranjo
+age=17
+alias=DtxdF
+```
+
+Y teniendo el siguiente *parser* (**test.c**):
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+#include "conf_parser.h"
+
+#define CMP(x,y) strcmp(x, y) == 0
+
+struct configuration {
+	char * name;
+	char * lastname;
+	long age;
+	char * alias;
+
+};
+
+int parser(void * config, char * key, char * value) {
+	struct configuration * conf = (struct configuration *)config;
+	char *endstr;
+
+	if (CMP(key, "name")) {
+		conf->name = strdup(value);
+	
+	} else if (CMP(key, "lastname")) {
+		conf->lastname = strdup(value);
+	
+	} else if (CMP(key, "age")) {
+		conf->age = strtol(value, &endstr, 10);
+
+		if (errno != 0) {
+			return errno;
+		
+		}
+	
+	} else if (CMP(key, "alias")) {
+		conf->alias = strdup(value);
+	
+	} else {
+		return 3; // Cuando una clave no es válida (Opcional)
+	
+	}
+
+	return 0;
+
+}
+
+int main(void) {
+	struct configuration config;
+	FILE * file;
+
+	if ((file = fopen("test.conf", "rb")) == NULL) {
+		perror("Error abriendo el archivo de configuración");
+	
+	}
+
+	if (ini_parse(file, &config, parser) != 0) {
+		perror("Ocurrio un error interpretando el archivo de configuración");
+
+		return errno;
+	
+	}
+
+	printf("Información del sujeto:\n");
+	printf("----------------------\n\n");
+
+	printf("Nombre: %s\n", config.name);
+	printf("Apellido: %s\n", config.lastname);
+	printf("Edad: %ld\n", config.age);
+	printf("Alias: %s\n", config.alias);
+
+	free(config.name);
+	free(config.lastname);
+	free(config.alias);
+
+	return EXIT_SUCCESS;
+
+}
+```
+
+Lo compilamos y ejecutamos:
+
+```bash
+gcc -Wall -O2 -o program test.c conf_parser.o strip.o
+./program
+```
+
+Y obtenemos:
+
+```
+Información del sujeto:
+----------------------
+
+Nombre: Josef
+Apellido: Naranjo
+Edad: 17
+Alias: DtxdF
+```
 
 ## TODO
 
