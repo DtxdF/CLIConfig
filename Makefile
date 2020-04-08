@@ -12,7 +12,7 @@ DSTDIR=/usr/bin
 ${TARGET}: ${OBJS}
 	${CC} ${CFLAGS} -o ${TARGET} main.c ${OBJS}
 
-conf_parser.o:
+conf_parser.o: strip.o
 	${CC} ${CFLAGS} -c conf_parser.c
 
 strip.o:
