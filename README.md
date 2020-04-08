@@ -117,6 +117,22 @@ Username = none
 [Procesado: wvdial.conf]
 ```
 
+**CLIConfig no le quita los espacios a las claves, por lo que en el caso de wvdial se tendría que colocar espacios.**
+
+```bash
+CLIConfig -s /etc/wvdial.conf -k "Username "
+```
+
+Resultado:
+
+```
+[Procesando: /etc/wvdial.conf]
+
+Username = none
+
+[Procesado: /etc/wvdial.conf]
+```
+
 Para modificar los servidores DNS de dnsmasq.conf haríamos los siguiente:
 
 ```bash
