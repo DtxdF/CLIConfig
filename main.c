@@ -543,7 +543,7 @@ void usage() {
 	fprintf(stderr, "    -s, --show        Mostrar las claves junto con el valor\n");
 	fprintf(stderr, "    -k, --key         Actuar sólo cuando haya una coincidencia con la clave\n");
 	fprintf(stderr, "    -w, --write       Escribir la clave y el valor en el archivo. No se sobre-escribirá el archivo al contrario de \"--overwrite\"\n");
-	fprintf(stderr, "    -v, --value       El valor de la clave a escribir. Sí se deja vacio, no se coloca.\n");
+	fprintf(stderr, "    -v, --value       El valor de la clave a escribir\n");
 	fprintf(stderr, "    -n, --no-banner   No mostrar el procesamiento de lo que se está haciendo (útil cuando se lee)\n");
 	fprintf(stderr, "    -o, --overwrite   Sobre-escribe el valor de una clave. ADVERTENCIA: ¡También sobre-escribe el archivo!\n");
 	fprintf(stderr, "    -E, --expression  Sólo actuar cuando haya una coincidencia con el valor\n");
