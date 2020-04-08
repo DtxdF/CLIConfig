@@ -9,15 +9,22 @@
 #include "main.h"
 #include "exists.h"
 
-int show_config(void * config, char * key, char * value);
-int write_config(FILE * file, char * key, char * value);
-int overwrite_config(void * config, char * name, char * val);
+// CALLBACKS
+int show_config(void * config, char * key, char * value); // Mostramos la configuración
+int write_config(FILE * file, char * key, char * value); // Escribimos en la configuración
+int overwrite_config(void * config, char * name, char * val); // Sobre-escribimos la configuración
+/* Detectamos si nuestro amigo "strtol" devuelve un error, sí es así
+   muestra un mensaje */
 int invalid_number(char * strton, const char * message);
+/* Reiniciamos valores auxiliares. Útil para cuando hay muchos
+   archivos */
+inline void reset_values();
 void usage();
 
 extern char * key;
 extern char * value;
 extern char * expression;
+extern int do_delete;
 extern int execute_exit;
 extern long only;
 extern long only_aux;
@@ -29,7 +36,7 @@ extern long pattern_aux;
 int main(int argc, char *argv[]) {
 	// La configuración del archivo temporal
 	struct tmp_config tmp_conf;
-	char tmp_name[] = "CLIConfig-XXXXXX";
+	char tmp_name[26];
 
 	FILE * file;
 
@@ -44,7 +51,7 @@ int main(int argc, char *argv[]) {
 	int opt;
 	int index = 0;
 	int errcod;
-	char * shortopts = ":hsk:wv:noE:O:i:p:";
+	char * shortopts = ":hsk:wv:noE:O:i:p:d";
 
 	char * filename;
 
@@ -60,6 +67,7 @@ int main(int argc, char *argv[]) {
 		{"only",       required_argument, NULL,         'O'},
 		{"id",         required_argument, NULL,         'i'},
 		{"pattern",    required_argument, NULL,         'p'},
+		{"delete",     required_argument, NULL,         'd'},
 		{0,            0,                 0,             0 }
 	
 	};
@@ -77,6 +85,10 @@ int main(int argc, char *argv[]) {
 				do_write = 1;
 				break;
 
+			case 'd':
+				do_overwrite = 1;
+				do_delete = 1;
+				break;
 			case 'o':
 				do_overwrite = 1;
 				break;
@@ -222,48 +234,63 @@ int main(int argc, char *argv[]) {
 			}
 
 		} else if (do_overwrite) {
-			if (!value) {
-				fprintf(stderr, "¡Debe definir el nombre de la clave y el valor para poder sobre-escribir!\n");
+			if (!value && !do_delete) {
+				fprintf(stderr, "¡Debe definir el valor para poder sobre-escribir!\n");
 
 				return 3;
 			
 			}
 
-			if ((!key) && (!expression)) {
-				fprintf(stderr, "Debe definir la clave o una expresión para usarla como patrón\n");
-			
+			if (!key && do_delete) {
+				fprintf(stderr, "Debe definir la clave a eliminar\n");
+
 				return 3;
+			
+			} else {
+				if (!key && !expression) {
+					fprintf(stderr, "Debe definir la clave o una expresión para usarla como coincidencia\n");
+				
+					return 3;
+
+				}
 
 			}
+
+			strncpy(tmp_name, "CLIConfig-XXXXXX", sizeof(char)*17);
 
 			tmp_conf.fd = mkstemp(tmp_name);
 
 			if ((errcod = ini_parse(file, &tmp_conf, overwrite_config)) != 0) {
-				perror("¡No se pudo sobre-escribir la clave en ese archivo de configuración!\n");
+				perror("¡No se pudo sobre-escribir la clave en ese archivo de configuración!");
 			
 				return errno;
 
 			} else {
 				if (execute_exit == 1) {
-					printf("¡%s ha sido modificado con éxito!\n", (key ? key : expression));
+					if (do_delete) {
+						printf("¡%s ha sido eliminado con éxito!\n", key);
+					
+					} else {
+						printf("¡%s ha sido modificado con éxito!\n", (key ? key : expression));
+
+					}
+
+					if (rename(tmp_name, filename) < 0) {
+						fprintf(stderr, "No se pudo re-escribir los datos modificados\n");
+
+						return errno;
+					
+					}
 				
 				} else {
 					fprintf(stderr, "No hubo coincidencias para modificar\n");
-
-					return 3;
 				
 				}
 			
 			}
 
 			close(tmp_conf.fd);
-
-			if (rename(tmp_name, filename) < 0) {
-				fprintf(stderr, "No se pudo re-escribir los datos modificados\n");
-
-				return errno;
-			
-			}
+			unlink(tmp_name);
 		
 		} else {
 			fprintf(stderr, "Error: ¡Opción no encontrada!\n");
@@ -278,6 +305,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		fclose(file);
+
+		reset_values();
 
 	}
 
@@ -298,6 +327,14 @@ int invalid_number(char * strton, const char * message) {
 	}
 
 	return n;
+
+}
+
+inline void reset_values() {
+	execute_exit = 0;
+	only_aux = 0;
+	id_aux = 0;
+	pattern_aux = 0;
 
 }
 
@@ -358,6 +395,26 @@ inline unsigned int pattern_count() {
 
 }
 
+inline unsigned int isdeleted(char * name) {
+	if ((!do_delete) || (!key)) {
+		return 0;
+	
+	}
+
+	if (strcmp(key, name) == 0) {
+		if (!pattern_count() || patterns == 0) {
+			execute_exit = 1;
+
+			return 1;
+		
+		}
+	
+	}
+
+	return 0;
+
+}
+
 int show_config(void * config, char * name, char * value) {
 	int found = 0;
 
@@ -388,7 +445,7 @@ int show_config(void * config, char * name, char * value) {
 		
 		}
 
-		execute_exit = 1; // Patrón encontrado :-D
+		execute_exit = 1; // Coincidencia encontrado :-D
 		print_if(name, value);
 		
 	
@@ -421,7 +478,7 @@ int overwrite_config(void * config, char * name, char * val) {
 	int found = 0;
 	int overwrite_normal = 0;
 
-	if ((only_count()) || identified()) {
+	if (only_count() || isdeleted(name)) {
 		return 0;
 	}
 
@@ -429,19 +486,23 @@ int overwrite_config(void * config, char * name, char * val) {
 	val_size = strlen(val);
 
 	write(conf->fd, name, strlen(name));
-	if (key) {
-		if (strcmp(key, name) == 0) {
-			found = 1;
 
-		}
+	if (!do_delete) {
+		if (key) {
+			if (strcmp(key, name) == 0) {
+				found = 1;
 
-	} else if(expression) {
-		if (strcmp(expression, val) == 0) {
-			found = 1;
+			}
+
+		} else if(expression) {
+			if (strcmp(expression, val) == 0) {
+				found = 1;
+			
+			}
 		
-		}
-	
-	} 
+		} 
+
+	}
 	
 	if (found) {
 		if (!pattern_count()) {
@@ -489,5 +550,6 @@ void usage() {
 	fprintf(stderr, "    -O, --only        Sólo actuar N veces\n");
 	fprintf(stderr, "    -i, --id          Actuar sólo cuando la N vez sea igual al identificador\n");
 	fprintf(stderr, "    -p, --pattern     Similar a \"--id\", pero actúa sólo con la N coincidencia\n");
+	fprintf(stderr, "    -d, --delete      Borrar una coincidencia. Al igual que \"-o\" ¡TAMBIÉN SOBRE-ESCRIBE EL ARCHIVO!\n");
 
 }

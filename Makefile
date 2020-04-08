@@ -1,6 +1,6 @@
 CC=gcc
 SHELL=/bin/sh
-OBJS=conf_parser.o strip.o getline_m.o exists.o
+OBJS=conf_parser.o strip.o exists.o
 TARGET=CLIConfig
 CFLAGS=-Wall -Wextra --verbose -O2 -ggdb
 INSTALL_PROGRAM=install
@@ -17,9 +17,6 @@ conf_parser.o:
 
 strip.o:
 	${CC} ${CFLAGS} -c strip.c
-
-getline_m.o:
-	${CC} ${CFLAGS} -c getline_m.c
 
 exists.o:
 	${CC} ${CFLAGS} -c exists.c
