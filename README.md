@@ -340,6 +340,8 @@ int main(void) {
 
 	if ((file = fopen("test.conf", "rb")) == NULL) {
 		perror("Error abriendo el archivo de configuración");
+                
+                return errno;
 	
 	}
 
