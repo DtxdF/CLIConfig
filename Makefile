@@ -3,11 +3,11 @@ SHELL=/bin/sh
 OBJS=conf_parser.o strip.o exists.o
 TARGET=CLIConfig
 CFLAGS=-Wall -Wextra --verbose -O2 -ggdb
-INSTALL_PROGRAM=install
-INSTALL_FLAGS=-v -b -C
 RM_PROGRAM=rm
 RM_FLAGS=-rf
 DSTDIR=/usr/bin
+DOCDST=/usr/share/man/man1
+DOCNAME=CLIConfig.1
 
 ${TARGET}: ${OBJS}
 	${CC} ${CFLAGS} -o ${TARGET} main.c ${OBJS}
@@ -25,9 +25,10 @@ clean: ${TARGET}
 	${RM_PROGRAM} ${RM_FLAGS} *.o
 
 install: ${TARGET}
-	${INSTALL_PROGRAM} ${INSTALL_FLAGS} ${TARGET} ${DSTDIR}
+	./INSTALL
 
 uninstall:
+	${RM_PROGRAM} ${RM_FLAGS} ${DOCDST}/${DOCNAME}.gz
 	${RM_PROGRAM} ${RM_FLAGS} ${DSTDIR}/${TARGET}
 
 .PHONY: clean install uninstall

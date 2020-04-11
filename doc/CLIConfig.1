@@ -1,0 +1,471 @@
+.TH CLIConfig 1 2020-04-10 "CLIConfig 1.0" "Manual básico de CLIConfig"
+
+.SH NOMBRE
+CLIConfig - Simple utilidad para la manipulación de archivos de configuración en la terminal.
+
+.SH SINOPSIS
+CLIConfig [OPTIONS] file[,file,file1,file2,...]
+
+.SH DESCRIPCIÓN
+.PP
+.B CLIConfig
+es una herramienta de código abierto para la manipulación de archivos en entornos *nix. CLIConfig es motivada a usarse en el scripting como una posible alternativa a la combinación de comandos como sed(1), cat(1) o cualquier otro que deje satisfecho a un administrador de sistema o incluso, se podría combinar con alguna herramienta antes mencionada.
+
+En *nix algunas veces los archivos de configuración terminan con la extensión
+.B .conf
+pero en realidad no es importante, es simple convención. La verdad del parser de CLIConfig es que sigue un formato muy simple:
+
+.B test.conf:
+.nf
+	clave=valor
+.fi
+
+Algo que se debe tener en cuenta es que el parser de CLIConfig no le quita los espacios a las claves porque trata de interpretarlo tal cual como está en el archivo de configuración. Por lo tanto al usar un parámetro para determinar qué clave poder usar, es elemental colocarla tal cual.
+
+.SH OPCIONES
+.TP
+.B -h,--help
+Muestra la ayuda rápida
+
+.TP
+.B -s,--show
+Muestra las claves junto con los valores parseados. Las almuadillas
+.B #
+Serán ignoradas, ya que se consideran comentarios
+
+.TP
+.BI -k,--key " clave"
+Actuará sólo con la clave especificada. Como se mencionó anteriormente, debe colocarse tal cual como está escrita
+
+.TP
+.B -w,--write
+Agrega una clave junto con su valor. Al contrario de
+.B -o/--overwrite
+no sobre-escribe el archivo
+
+.TP
+.BI -v,--value " valor"
+El valor de la clave que se usará para escribir en el archivo de configuración
+
+.TP
+.B -n,--no-banner
+Cuando se ejecuta una orden, se muestra un mensaje indicando qué archivo se está procesando. El mensaje que se mostrará a continuación es útil suprimirlo para concatenar varios archivos de configuración:
+
+.nf
+
+[Procesando: ...]
+
+ --------------
+
+[Procesado: ...]
+
+.fi
+
+.TP
+.B -o,--overwrite
+Sobre-escribir el valor de una clave, pero
+.B ¡Tenga sumo cuidado!
+porque también sobre-escribirá el archivo de configuración, lo que significa que tampoco se agregarán los comentarios de éste
+
+.TP
+.BI -E,--expression " valor"
+Algunas veces es necesario buscar por el mismo valor en vez de usar la clave, no obstante cuando el parámetro
+.B -k/--key
+se combina con
+.B -E/--expression
+se tomará en cuenta el primero en vez del segundo
+
+.TP
+.BI -I,--init " número-de-inicio"
+Si se desea comenzar a realizar operaciones a partir de un
+.B número-de-inicio.
+Para entender esto mejor, es necesario que sepa que el parser de CLIConfig lee línea por línea el archivo de configuración, por lo que si el archivo tiene 5 líneas (Sin incluir comentarios) y deseamos comenzar a realizar alguna operación a partir de la 2, se tendría que usar esta opción
+
+.TP
+.BI -O,--only " número-final"
+El
+.I número-final
+índica el rango final que debe realizar una operación. Piense que es algo parecido que
+.B -I/--init,
+pero en lugar de indicar "a partir", dice "hasta cuándo".
+
+.TP
+.B --offset
+Agregado por semántica. Es lo mismo que
+.B -O/--only
+
+.TP
+.BI -i,--id " identificador"
+Imagine que el parser tiene un contador, y que la opción
+.B -i/--id
+es la señal para ejecutar alguna operación cuando llegue ahí. Desde el punto de vista de un programador se podría ver de la siguiente manera:
+
+.nf
+	int id = 5; // El identificador
+	int i;
+	int l = 100; // Supongamos que el archivo tiene hasta 100 claves. Vamos a llamarlo "limite"
+
+	for (i = 0; i < l; i++) {
+		if (id == i) { // Cuando "i" sea igual a "id", parar y hacer algo
+			// Hacer algo
+
+		}
+
+	}
+
+.fi
+
+En el ejemplo anterior se aprecia un pequeño snippet que ilustra de una manera abstracta más o menos el funcionamiento de CLIConfig al usar el parámetro
+.B -i/--id
+
+.TB
+.BI -p,--pattern " coincidencia"
+Esta opción es parecida a
+.B -i/--id,
+pero en su lugar en vez de contar cada clave y parar en una en específico, lo hace cuando se detecte un número determinado de coincidencias. Siguiendo el ejemplo con los snippets, usemos otro:
+
+.nf
+	int pattern = 3; // Parar y hacer algo cuando haya 3 coincidencias máximo
+	int count = 0;
+
+	while (1) {
+		if (strcmp("...", "...") == 0) {
+			count++;
+
+			if (count == pattern) {
+				// Cuando se cumplan las 3 coincidencias se para y hace algo, si no, se
+				// ignora.
+
+			}
+
+		}
+
+	}
+
+.fi
+
+.TP
+.B -d/--delete
+Borra una clave o más claves. Al igual que
+.B -o/--overwrite
+sobre-escribe el archivo de configuración, así que
+.B ¡TENGA CUIDADO!
+
+.SH FALLOS
+Al encontrarse con un fallo en el software suministrado puede enviar su propia corrección al mismo repositorio
+.B "https://github.com/DtxdF"
+o también puede informarme o hacerme cualquier pregunta a
+.B DtxdF@protonmail.com
+
+.SH EJEMPLOS
+
+CLIConfig es solo una interfaz, la verdadera estrella es "conf_parser.c" que se encarga de casi todo el trabajo. Aquí un ejemplo de como usarla:
+
+.B test.conf
+
+Teniendo el siguiente archivo de configuración:
+
+.nf
+name=Josef
+lastname=Naranjo
+age=17
+alias=DtxdF
+.fi
+
+.B test.c
+
+Y teniendo el siguiente parser:
+
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+#include "conf_parser.h"
+
+#define CMP(x,y) strcmp(x, y) == 0
+
+struct configuration {
+	char * name;
+	char * lastname;
+	long age;
+	char * alias;
+
+};
+
+int parser(void * config, char * key, char * value) {
+	struct configuration * conf = (struct configuration *)config;
+	char *endstr;
+
+	if (CMP(key, "name")) {
+		conf->name = strdup(value);
+	
+	} else if (CMP(key, "lastname")) {
+		conf->lastname = strdup(value);
+	
+	} else if (CMP(key, "age")) {
+		conf->age = strtol(value, &endstr, 10);
+
+		if (errno != 0) {
+			return errno;
+		
+		}
+	
+	} else if (CMP(key, "alias")) {
+		conf->alias = strdup(value);
+	
+	} else {
+		return 3; // Cuando una clave no es válida (Opcional)
+	
+	}
+
+	return 0;
+
+}
+
+int main(void) {
+	struct configuration config;
+	FILE * file;
+
+	if ((file = fopen("test.conf", "rb")) == NULL) {
+		perror("Error abriendo el archivo de configuración");
+                
+                return errno;
+	
+	}
+
+	if (ini_parse(file, &config, parser) != 0) {
+		perror("Ocurrio un error interpretando el archivo de configuración");
+
+		return errno;
+	
+	}
+
+	printf("Información del sujeto:\n");
+	printf("----------------------\n\n");
+
+	printf("Nombre: %s\n", config.name);
+	printf("Apellido: %s\n", config.lastname);
+	printf("Edad: %ld\n", config.age);
+	printf("Alias: %s\n", config.alias);
+
+	free(config.name);
+	free(config.lastname);
+	free(config.alias);
+
+	fclose(file);
+
+	return EXIT_SUCCESS;
+
+}
+.fi
+
+.B Al compilar y ejecutar:
+
+.nf
+ gcc -Wall -O2 -o program test.c conf_parser.o strip.o
+ ./program
+.fi
+
+.B se obtiene:
+
+.nf
+Información del sujeto:
+----------------------
+
+Nombre: Josef
+Apellido: Naranjo
+Edad: 17
+Alias: DtxdF
+.fi
+
+.B Ejemplos de CLIConfig
+
+Usaremos los siguientes archivos de configuración en todo el tutorial:
+
+.B test.1.conf
+
+.nf
+user=DtxdF
+pass=123
+new user = 1
+.fi
+
+.B test.2.conf
+
+.nf
+server=1.1.1.1
+server=8.8.8.8
+.fi
+
+.B Leer la configuración
+
+.nf
+CLIConfig test.1.conf -s
+.fi
+
+Resultado:
+
+.nf
+[Procesando: test.1.conf]
+
+user=DtxdF
+pass=123
+new user = 1
+
+[Procesado: test.1.conf]
+.fi
+
+.I Para_no_mostrar_el_procesamiento_se_utiliza_el_parámetro_-n/--no-banner
+
+.B Mostrar una clave específica
+
+.nf
+CLIConfig -s -k pass test.1.conf
+.fi
+
+.nf
+[Procesando: test.1.conf]
+
+pass=123
+
+[Procesado: test.1.conf]
+.fi
+
+.B Todo lo que no sea un parámetro o un argumento de un parámetro es considerado un archivo
+
+.nf
+CLIConfig -s test.2.conf test.1.conf
+.fi
+
+.nf
+[Procesando: test.2.conf]
+
+server=1.1.1.1
+server=8.8.8.8
+
+[Procesado: test.2.conf]
+[Procesando: test.1.conf]
+
+user=DtxdF
+pass=123
+new user = 1
+
+[Procesado: test.1.conf]
+.fi
+
+.B CLIConfig no le quita los espacios a las claves, por que se debe de colocar tal cual
+
+.nf
+CLIConfig -s -k "new user " test.1.conf
+.fi
+
+.nf
+[Procesando: test.1.conf]
+
+new user = 1
+
+[Procesado: test.1.conf]
+.fi
+
+.B Para sobre-escribir el valor de una clave
+
+.nf
+CLIConfig -o -k server -v 1.0.0.1 test.2.conf
+CLIConfig -s test.2.conf
+.fi
+
+.nf
+[Procesando: test.2.conf]
+
+server=1.0.0.1
+server=1.0.0.1
+
+[Procesado: test.2.conf]
+.fi
+
+Ocurrió un inconveniente, nuestra meta era modificar solo una clave, pero ¡se modificaron todas!. Para arreglar eso, hagamos lo siguiente:
+
+.nf
+CLIConfig -o -k server -v 1.1.1.1 -p 1 test.2.conf
+cat test.2.conf
+.fi
+
+.nf
+server=1.1.1.1
+server=1.0.0.1
+.fi
+
+.B Agregar una clave
+
+.nf
+CLIConfig -w -k server -v 8.8.8.8 test.2.conf
+cat test.2.conf
+.fi
+
+.nf
+server=1.1.1.1
+server=1.0.0.1
+server=8.8.8.8
+.fi
+
+.B Eliminar todas las claves
+
+.nf
+CLIConfig test.2.conf -d -k server
+.fi
+
+.B Eliminar solo una clave
+
+.nf
+CLIConfig test.2.conf -d -k server -p 2
+.fi
+
+.SH COMBINACIONES PERMITIDAS
+
+La siguiente tabla ilustra las combinaciones entre parámetros:
+
+.nf
+
+|     Parámetro      |              Combinación               |
+| ------------------ | -------------------------------------- |
+| -s/--show          | -k/--key, -E/--expression,             |
+|                    | -O/--only, -i/--id, -p/--pattern,      |
+|                    | -I/--init                              |
+| ------------------ | -------------------------------------- |
+| -k/--key           | -v/--value, -w/--write, -s/--show,     |
+|                    | -o/--overwrite, -O/--only, -i/--id,    |
+|                    | -p/--pattern, -d/--delete, -I/--init   |
+| ------------------ | -------------------------------------- |
+| -w/--write         | -k/--key, -v/--value                   |
+|                    | -------------------------------------- |
+| -v/--value         | -k/--key, -w/--write, -o/--overwrite,  |
+|                    | -O/--only, -p/--pattern, -I/--init     |
+| ------------------ | -------------------------------------- |
+| -o/--overwrite     | -k/--key, -v/--value, -E/--expression, |
+|                    | -O/--only, -p/--pattern, -I/--init     |
+| ------------------ | -------------------------------------- |
+| -E/--expression    | -s/--show, -v/--value, -o/--overwrite, |
+|                    | -O/--only, -p/--pattern, -I/--init     |
+| ------------------ | -------------------------------------- |
+| -I/--init          | -s/--show, -k/--key, -v/--value,       |
+|                    | -o/--overwrite, -E/--expression,       |
+|                    | -p/--pattern, -d/--delete              |
+| ------------------ | -------------------------------------- |
+| -O/--only/--offset | -s/--show, -k/--key, -v/--value,       |
+|                    | -o/--overwrite, -E/--expression,       |
+|                    | -i/--id, -p/--pattern, -d/--delete,    |
+|                    | -I/--init                              |
+| ------------------ | -------------------------------------- |
+| -i/--id            | -s/--show, -O/--only                   |
+| ------------------ | -------------------------------------- |
+| -p/--pattern       | -s/--show, -k/--key, -v/--value,       |
+|                    | -o/--overwrite, -E/--expression,       |
+|                    | -O/--only, -d/--delete, -I/--init      |
+
+.fi
+
+.SH AUTOR
+
+DtxdF <DtxdF@protonmail.com>

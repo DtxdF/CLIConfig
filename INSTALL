@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+declare -x DOC
+declare -x DOCNAME
+declare -x DOCDST
+declare -x ABSOLUTE
+declare -x DST
+
+set -e
+
+DOC="doc/CLIConfig.1"
+DOCNAME=$(basename $DOC)
+DOCDST="/usr/share/man/man1"
+ABSOLUTE="$DOCDST/$DOCNAME"
+DST="/usr/bin"
+TARGET=CLIConfig
+BIN="$DST/$TARGET"
+
+if [ "$UID" != 0 ];then
+	echo "Necesitas privilegios para comenzar la instalación" >&2
+
+	exit 1
+
+fi
+
+if ! [ -f "$ABSOLUTE.gz" ] && ! [ -f "$BIN" ]; then
+	gzip -v -c $DOC > "$ABSOLUTE.gz"
+	cp -v CLIConfig $DST
+
+else
+	echo "No se puede seguir con la instalación porque ya ha hecho una anteriormente" >&2
+
+	exit 1
+
+fi
+
+clear && echo "Hecho."

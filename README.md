@@ -6,8 +6,9 @@
 ```bash
 git clone https://github.com/DtxdF/CLIConfig.git
 cd ./CLIConfig
+sudo chmod +x ./INSTALL
 sudo make install
-CLIConfig -h
+man CLIConfig # o CLIConfig -h
 ```
 
 ## Ejemplos de CLIConfig
@@ -391,7 +392,7 @@ Alias: DtxdF
 ## TODO
 
 * Auto-completado de comandos
-* Manpage
+* --Manpage--
 * Verificador de sintaxis
 
 \~ DtxdF
