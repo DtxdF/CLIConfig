@@ -394,7 +394,7 @@ Alias: DtxdF
 ## TODO
 
 * Auto-completado de comandos
-* --Manpage--
+* ~Manpage~
 * Verificador de sintaxis
 
 \~ DtxdF
