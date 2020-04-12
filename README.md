@@ -6,7 +6,6 @@
 ```bash
 git clone https://github.com/DtxdF/CLIConfig.git
 cd ./CLIConfig
-sudo chmod +x ./INSTALL
 sudo make install
 man CLIConfig # o CLIConfig -h
 ```

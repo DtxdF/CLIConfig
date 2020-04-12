@@ -1,34 +1,57 @@
-CC=gcc
-SHELL=/bin/sh
-OBJS=conf_parser.o strip.o exists.o
-TARGET=CLIConfig
-CFLAGS=-Wall -Wextra --verbose -O2 -ggdb
-RM_PROGRAM=rm
-RM_FLAGS=-rf
-DSTDIR=/usr/bin
-DOCDST=/usr/share/man/man1
-DOCNAME=CLIConfig.1
+TARGET = CLIConfig
+OBJECTS = main.o exists.o conf_parser.o \
+		  strip.o
+CC = gcc
+CFLAGS =-Wall -Wextra --verbos -O2 -ggdb
+RM = rm
+RMFLAGS = -v -f
+prefix = /usr
+exec_prefix = $(prefix)
+mandir = $(prefix)/share/man
+man1dir = $(mandir)/man1
+srcdir = .
+bindir = $(exec_prefix)/bin
+INSTALL = install
+INSTALL_PROGRAM = $(INSTALL) -m 0751 -v -C
+INSTALL_DATA = $(INSTALL) -m 0644 -v -C
 
-${TARGET}: ${OBJS}
-	${CC} ${CFLAGS} -o ${TARGET} main.c ${OBJS}
+all: $(TARGET)
 
-conf_parser.o: strip.o
-	${CC} ${CFLAGS} -c conf_parser.c
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(TARGET) $^
 
-strip.o:
-	${CC} ${CFLAGS} -c strip.c
+conf_parser.o: strip.h conf_parser.h strip.o
 
-exists.o:
-	${CC} ${CFLAGS} -c exists.c
+main.o: conf_parser.h main.h exists.h \
+		conf_parser.o exists.o
 
-clean: ${TARGET}
-	${RM_PROGRAM} ${RM_FLAGS} *.o
+clean: cleanobj
 
-install: ${TARGET}
-	./INSTALL
+cleanall: cleanobj
+	-$(RM) $(RMFLAGS) $(TARGET)
+
+cleanobj:
+	-$(RM) $(RMFLAGS) $(OBJECTS)
+
+install: all
+	$(INSTALL) -v -d "$(prefix)"
+	$(INSTALL) -v -d "$(exec_prefix)"
+	$(INSTALL) -v -d "$(bindir)"
+	$(INSTALL) -v -d "$(mandir)"
+	$(INSTALL) -v -d "$(man1dir)"
+	
+	-$(INSTALL_PROGRAM) "$(srcdir)/$(TARGET)" "$(bindir)"
+
+	if ! [ -f "$(srcdir)/doc/CLIConfig.1.gz" ] ; \
+	then \
+		gzip "$(srcdir)/doc/CLIConfig.1" ; \
+	fi;
+
+	-$(INSTALL_DATA) "$(srcdir)/doc/CLIConfig.1.gz" "$(man1dir)"
 
 uninstall:
-	${RM_PROGRAM} ${RM_FLAGS} ${DOCDST}/${DOCNAME}.gz
-	${RM_PROGRAM} ${RM_FLAGS} ${DSTDIR}/${TARGET}
+	-$(RM) $(RMFLAGS) "$(bindir)/$(TARGET)"
+	-$(RM) $(RMFLAGS) "$(man1dir)/CLIConfig.1.gz"
 
-.PHONY: clean install uninstall
+.SILENT: clean cleanobj cleanall
+.PHONY: clean cleanall cleanobj all install uninstall
