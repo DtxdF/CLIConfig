@@ -4,6 +4,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include "conf_parser.h"
 #include "main.h"
@@ -362,55 +363,55 @@ inline void print_if(char * name, char * value) {
 
 }
 
-inline unsigned int only_count() {
+inline bool only_count() {
 	if (only == 0) {
-		return 0;
+		return false;
 	
 	}
 
 	if (only == only_aux) {
-		return 1;
+		return true;
 	
 	} else {
 		only_aux++;
-		return 0;
+		return false;
 	
 	}
 
 }
 
-inline unsigned int identified() {
+inline bool identified() {
 	if (identifier == 0) {
-		return 0;
+		return false;
 	
 	}
 	
 	id_aux++;
 
 	if (identifier == id_aux) {
-		return 0;
+		return false;
 	
 	}
 
-	return 1;
+	return true;
 
 }
 
-inline unsigned int pattern_count() {
+inline bool pattern_count() {
 	pattern_aux++;
 
 	if ((patterns != pattern_aux) && (patterns != 0)) {
-		return 1;
+		return true;
 	
 	}
 
-	return 0;
+	return false;
 
 }
 
-inline unsigned int isdeleted(char * name) {
+inline bool isdeleted(char * name) {
 	if ((!do_delete) || (!key)) {
-		return 0;
+		return false;
 	
 	}
 
@@ -418,30 +419,30 @@ inline unsigned int isdeleted(char * name) {
 		if (!pattern_count() || patterns == 0) {
 			execute_exit = 1;
 
-			return 1;
+			return true;
 		
 		}
 	
 	}
 
-	return 0;
+	return false;
 
 }
 
-inline unsigned int init_count() {
+inline bool init_count() {
 	if (init == 0) {
-		return 0;
+		return false;
 
 	}
 
 	init_aux++;
 
 	if (init_aux < init) {
-		return 1;
+		return true;
 	
 	}
 
-	return 0;
+	return false;
 
 }
 

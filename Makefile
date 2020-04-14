@@ -2,7 +2,7 @@ TARGET = CLIConfig
 OBJECTS = main.o exists.o conf_parser.o \
 		  strip.o
 CC = gcc
-CFLAGS =-Wall -Wextra --verbose -O2 -ggdb -pipe
+CFLAGS =-Wall -Wextra -O2 -ggdb -pipe
 RM = rm
 RMFLAGS = -v -f
 prefix = /usr
