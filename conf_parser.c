@@ -5,6 +5,7 @@
 
 #include "strip.h"
 #include "conf_parser.h"
+#include "getline_m.h"
 
 // Con lo siguiente calculamos el tamaño de la clave
 inline size_t count_toequal(char * buffer) {
@@ -29,7 +30,9 @@ inline size_t count_tozero(char * buffer, size_t offset) {
 
 }
 
-int ini_parse(FILE * file, void * config, conf_parser_func func) {
+int ini_parse(FILE * file,
+			  void * config,
+			  conf_parser_func func) {
 	char * buffer = NULL;
 	char * key = NULL;
 	char * value = NULL;
@@ -40,13 +43,12 @@ int ini_parse(FILE * file, void * config, conf_parser_func func) {
 	size_t value_size = 0;
 	size_t buff_size;
 	size_t lstrip_size;
-	size_t size = 0;
 
 	int key_index;
 	int value_index;
 	int errcod;
 
-	while(getline(&buffer, &size, file) != -1) {
+	while(getline_m(&buffer, file) != NULL) {
 		buff_size = strlen(buffer);
 
 		if (buff_size == 0) {
@@ -101,6 +103,9 @@ int ini_parse(FILE * file, void * config, conf_parser_func func) {
 			free(value);
 
 			if (errcod != 0) {
+				free(lstrip_ptr);
+				free(rstrip_ptr);
+
 				break;
 			
 			}

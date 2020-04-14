@@ -3,11 +3,25 @@
 
 ## Instalación
 
+### Descarga:
+
 ```bash
 git clone https://github.com/DtxdF/CLIConfig.git
-cd ./CLIConfig
-sudo make install
+cd CLIConfig
+```
+
+### GNU/Linux:
+
+```bash
+sudo make -f linux.mk install
 man CLIConfig # o CLIConfig -h
+```
+
+### Windows:
+
+```bash
+mingw32-make -f windows.mk
+CLIConfig.exe -h
 ```
 
 ## Ejemplos de CLIConfig
@@ -374,7 +388,7 @@ int main(void) {
 Lo compilamos y ejecutamos:
 
 ```bash
-gcc -Wall -O2 -o program test.c conf_parser.o strip.o
+gcc -Wall -O2 -o program test.c conf_parser.o strip.o getline_m.o
 ./program
 ```
 
